@@ -43,3 +43,16 @@ export function getExpressChampions(allChampions, roomCode, count = 20) {
 
   return pool.slice(0, count);
 }
+
+// Genera un código de sala aleatorio (por ejemplo "X7F2Q9")
+export function generateRandomRoomCode(length = 6) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin 0, 1, O, I para evitar confusión
+  let code = "";
+
+  for (let i = 0; i < length; i++) {
+    const index = Math.floor(Math.random() * chars.length);
+    code += chars[index];
+  }
+
+  return code;
+}
