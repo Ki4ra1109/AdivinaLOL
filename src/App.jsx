@@ -87,7 +87,7 @@ function App() {
     }
 
     // Ya hay campeón elegido:
-    if (id === selectedChampionId) return; // no descartar tu propio campeón
+    // AHORA SÍ se puede descartar el campeón seleccionado
 
     // Toggle descartado
     setDiscardedIds((prev) =>
@@ -110,6 +110,16 @@ function App() {
     resetBoardState();
   };
 
+  // Elegir campeón aleatorio desde el tablero actual
+  const handleRandomChampion = () => {
+    if (!championsToShow.length) return;
+    const randomIndex = Math.floor(Math.random() * championsToShow.length);
+    const randomChampion = championsToShow[randomIndex];
+    setSelectedChampionId(randomChampion.id);
+    setDiscardedIds([]);
+    setPendingChampion(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
@@ -125,6 +135,8 @@ function App() {
       </div>
     );
   }
+
+  const canRandomPick = championsToShow.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 relative">
@@ -222,6 +234,21 @@ function App() {
 
       {/* CONTENIDO PRINCIPAL */}
       <main className="px-4 py-6 max-w-6xl mx-auto space-y-6">
+        {/* INSTRUCCIONES PRINCIPALES */}
+        <div className="bg-slate-800/80 border border-slate-700 rounded-lg px-4 py-3">
+          <p className="text-sm md:text-base font-semibold text-white">
+            Cómo jugar
+          </p>
+          <p className="mt-1 text-xs md:text-sm text-slate-100">
+            1. Elige el modo de juego (Completo o Express). 2. En modo
+            Express, usa o comparte un código de sala para tener el mismo tablero.
+            3. Haz clic en una carta o usa{" "}
+            <span className="font-semibold">“Elegir campeón aleatorio”</span> para
+            escoger tu campeón. 4. Haz clic en las cartas del tablero para ir
+            descartando campeones.
+          </p>
+        </div>
+
         {/* FILA: Modo de juego + Campeón seleccionado */}
         <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:justify-between">
           {/* MODO DE JUEGO (izquierda) */}
@@ -266,36 +293,52 @@ function App() {
                 <p className="text-xs text-slate-400 text-center px-2">
                   Campeón no seleccionado
                   <br />
-                  Haz clic en una carta para elegirlo.
+                  Haz clic en una carta o usa el botón aleatorio.
                 </p>
               )}
             </div>
 
             {selectedChampion && (
-              <>
-                <div className="text-center">
-                  <p className="text-sm font-semibold">
-                    {selectedChampion.name}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {selectedChampion.title}
-                  </p>
-                </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold">
+                  {selectedChampion.name}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {selectedChampion.title}
+                </p>
+              </div>
+            )}
+
+            {/* Botones bajo el cuadro del campeón */}
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                onClick={handleRandomChampion}
+                disabled={!canRandomPick}
+                className={`px-5 py-2 rounded-md text-xs font-semibold ${
+                  canRandomPick
+                    ? "bg-emerald-500 text-slate-900 hover:bg-emerald-400"
+                    : "bg-slate-700 text-slate-400 cursor-not-allowed"
+                }`}
+              >
+                Elegir campeón aleatorio
+              </button>
+
+              {selectedChampion && (
                 <button
                   onClick={handleEndGame}
                   className="px-5 py-2 rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-semibold"
                 >
                   Finalizar partida
                 </button>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Espaciador derecho para equilibrar */}
           <div className="hidden md:block w-40" />
         </div>
 
-        {/* INFO EXPRESS / COMPLETO */}
+        {/* INFO EXPRESS / COMPLETO (se mantiene) */}
         {mode === "express" && !hasGeneratedExpress && (
           <p className="text-xs text-slate-400 text-center md:text-left">
             Ingresa o genera un código de sala en la barra superior para crear un
@@ -317,12 +360,11 @@ function App() {
 
         {mode === "full" && (
           <p className="text-xs text-slate-400 text-center md:text-left">
-            Estás viendo todos los campeones actuales del juego. Elige uno y luego ve
-            descartando cartas como en un “Adivina Quién”.
+            Estás viendo todos los campeones actuales del juego.
           </p>
         )}
 
-        {/* GRILLA DE CARTAS (versión que te gusta) */}
+        {/* GRILLA DE CARTAS (igual que antes) */}
         <div>
           {mode === "express" &&
             hasGeneratedExpress &&
